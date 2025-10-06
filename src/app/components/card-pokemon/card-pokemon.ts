@@ -1,4 +1,4 @@
-import { NgClass } from '@angular/common';
+import { DecimalPipe, NgClass } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Pokemon } from '../../models/pokemon';
@@ -6,11 +6,14 @@ import { mapeamentoDeCoresPorTipo } from '../../util/mapeamento-de-cores-por-tip
 
 @Component({
   selector: 'app-card-pokemon',
-  imports: [NgClass, RouterLink],
+  imports: [NgClass, DecimalPipe, RouterLink],
   template: `
     @if (pokemon) {
       <div class="card p-3 text-center">
         <div class="card-body d-flex flex-column">
+          <img style="min-width: 200px;" [src]="pokemon.urlSprite" [alt]="pokemon.nome" />
+
+          <span class="text-secondary fs-5">#{{ pokemon.id | number: '3.0' }}</span>
           @if (exibirLink) {
             <a class="text-decoration-none" [routerLink]="['/pokemons', pokemon.id]">
               <h5 class="card-title">{{ pokemon.nome }}</h5>
@@ -28,8 +31,6 @@ import { mapeamentoDeCoresPorTipo } from '../../util/mapeamento-de-cores-por-tip
               >
             }
           </div>
-
-          <img style="min-width: 200px;" [src]="pokemon.urlSprite" [alt]="pokemon.nome" />
 
           <br />
 
