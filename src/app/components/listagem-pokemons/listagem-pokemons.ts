@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { Pokemon } from '../../models/pokemon';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CardPokemon } from '../card-pokemon/card-pokemon';
 import { Observable } from 'rxjs';
 import { PokeApiService } from '../../services/poke-api-service';
@@ -17,12 +17,30 @@ export class ListagemPokemons implements OnInit {
 
   public pokemonsFavoritos$?: Observable<Pokemon[]>;
 
+  public paginaAtual: number = 1;
+
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   public readonly localStorageService = inject(LocalStorageService);
   private readonly pokeApiService = inject(PokeApiService);
 
   ngOnInit(): void {
-    this.pokemons$ = this.pokeApiService.selecionarPokemons();
+    this.route.paramMap.subscribe((params) => {
+      const paginaParam = params.get('pagina');
+      let pagina = paginaParam ? parseInt(paginaParam) : 1;
 
-    this.pokemonsFavoritos$ = this.localStorageService.selecionarFavoritos();
+      if (pagina < 1) pagina = 1;
+      if (pagina > 13) pagina = 13;
+
+      if (pagina !== (paginaParam ? parseInt(paginaParam) : 1)) {
+        this.router.navigate(['/pokemons/pagina', pagina]);
+        return;
+      }
+
+      this.paginaAtual = pagina;
+
+      this.pokemons$ = this.pokeApiService.selecionarPokemons(this.paginaAtual);
+      this.pokemonsFavoritos$ = this.localStorageService.selecionarFavoritos();
+    });
   }
 }

@@ -14,8 +14,12 @@ export class PokeApiService {
   private readonly http = inject(HttpClient);
   private readonly localStorageService = inject(LocalStorageService);
 
-  public selecionarPokemons(): Observable<Pokemon[]> {
-    return this.http.get<PokeApiResponse>(this.url).pipe(
+  public selecionarPokemons(pagina: number): Observable<Pokemon[]> {
+    const limitPagina = 30;
+    const offsetPagina = (pagina - 1) * limitPagina;
+    const newUrl = `${this.url}?offset=${offsetPagina}&limit=${limitPagina}`;
+
+    return this.http.get<PokeApiResponse>(newUrl).pipe(
       switchMap((obj) => {
         const requests = obj.results.map((r) => this.http.get<PokeApiDetailsResponse>(r.url));
 
@@ -25,6 +29,7 @@ export class PokeApiService {
       map(([objDetalhes, favoritos]) => {
         return objDetalhes
           .map((d) => this.mapearPokemon(d))
+          .filter((p) => p.id <= 386)
           .map((p) => ({
             ...p,
             favorito: favoritos.some((f) => f.id === p.id),

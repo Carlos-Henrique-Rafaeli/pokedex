@@ -9,8 +9,8 @@ import { ListagemPokemons } from './components/listagem-pokemons/listagem-pokemo
 import { DetalhesPokemon } from './components/detalhes-pokemon/detalhes-pokemon';
 
 const routes: Routes = [
-  { path: '', redirectTo: 'pokemons', pathMatch: 'full' },
-  { path: 'pokemons', component: ListagemPokemons },
+  { path: '', redirectTo: 'pokemons/pagina/1', pathMatch: 'full' },
+  { path: 'pokemons/pagina/:pagina', component: ListagemPokemons },
   { path: 'pokemons/:id', component: DetalhesPokemon },
 ];
 

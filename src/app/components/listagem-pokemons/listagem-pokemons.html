@@ -1,4 +1,20 @@
-<h2>Listagem de Pokémons</h2>
+<div class="d-flex align-items-center mb-3">
+  <h2>Listagem de Pokémons</h2>
+  <a
+    [routerLink]="['/pokemons/pagina', paginaAtual - 1]"
+    [class.disabled]="paginaAtual === 1"
+    class="btn btn-outline-secondary"
+  >
+    <i class="bi bi-arrow-left"></i>
+  </a>
+  <a
+    [routerLink]="['/pokemons/pagina', paginaAtual + 1]"
+    [class.disabled]="paginaAtual === 13"
+    class="btn btn-outline-secondary"
+  >
+    <i class="bi bi-arrow-right"></i>
+  </a>
+</div>
 
 <hr />
 
@@ -18,7 +34,7 @@
 
 <div class="row g-3 mt-3">
   @for (pokemon of pokemons$ | async; track pokemon.nome) {
-    <div class="col-md-3" style="min-height: 200px">
+    <div class="col-md-3" style="width: 20%">
       <app-card-pokemon
         [pokemon]="pokemon"
         [exibirLink]="true"
