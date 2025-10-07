@@ -1,36 +1,45 @@
-<div class="d-flex align-items-center mb-3">
-  <h2>Listagem de Pokémons</h2>
-  <a
-    [routerLink]="['/pokemons/pagina', paginaAtual - 1]"
-    [class.disabled]="paginaAtual === 1"
-    class="btn btn-outline-secondary"
-  >
-    <i class="bi bi-arrow-left"></i>
-  </a>
-  <a
-    [routerLink]="['/pokemons/pagina', paginaAtual + 1]"
-    [class.disabled]="paginaAtual === 13"
-    class="btn btn-outline-secondary"
-  >
-    <i class="bi bi-arrow-right"></i>
-  </a>
+<div class="d-flex justify-content-between align-items-center">
+  <div>
+    <h2 class="m-0">Listagem de Pokémons</h2>
+  </div>
+  <div>
+    <a
+      [routerLink]="['/pokemons/pagina', paginaAtual - 1]"
+      [class.disabled]="paginaAtual === 1"
+      class="btn btn-outline-secondary"
+    >
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    <a
+      [routerLink]="['/pokemons/pagina', paginaAtual + 1]"
+      [class.disabled]="paginaAtual === 13"
+      class="btn btn-outline-secondary"
+    >
+      <i class="bi bi-arrow-right"></i>
+    </a>
+  </div>
 </div>
 
 <hr />
 
-<div class="row justify-content-center g-2 mt-3">
-  @for (pokemon of pokemonsFavoritos$ | async; track pokemon.nome) {
-    <div class="col-3 col-md-1">
-      <a [routerLink]="['/pokemons', pokemon.id]" [title]="pokemon.nome">
-        <div class="card border-2">
-          <div class="card-body text-center">
-            <img class="img-fluid" [src]="pokemon.urlSprite" [alt]="pokemon.nome" />
+<div>
+  <h3>Pokémons Favoritos</h3>
+  <div class="d-flex overflow-auto py-2" style="max-height: 200px">
+    @for (pokemon of pokemonsFavoritos$ | async; track pokemon.nome) {
+      <div class="me-2" style="flex: 0 0 auto; width: 128px">
+        <a [routerLink]="['/pokemons', pokemon.id]" [title]="pokemon.nome">
+          <div class="card border-2">
+            <div class="card-body text-center">
+              <img class="img-fluid" [src]="pokemon.urlSprite" [alt]="pokemon.nome" />
+            </div>
           </div>
-        </div>
-      </a>
-    </div>
-  }
+        </a>
+      </div>
+    }
+  </div>
 </div>
+
+<hr />
 
 <div class="row g-3 mt-3">
   @for (pokemon of pokemons$ | async; track pokemon.nome) {
