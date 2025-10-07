@@ -1,10 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { forkJoin, map, Observable, switchMap } from 'rxjs';
+import { forkJoin, map, Observable, switchMap, withLatestFrom } from 'rxjs';
 import { DetalhesDoPokemon, Pokemon } from '../models/pokemon';
 import { PokeApiDetailsResponse, PokeApiResponse } from '../models/poke-api';
 import { converterParaTitleCase } from '../util/converter-para-title-case';
-import { pokemonsFavoritos } from '../util/pokemon-favoritos';
+import { LocalStorageService } from './local-storage-service';
 
 @Injectable({
   providedIn: 'root',
@@ -12,15 +12,23 @@ import { pokemonsFavoritos } from '../util/pokemon-favoritos';
 export class PokeApiService {
   private readonly url: string = 'https://pokeapi.co/api/v2/pokemon';
   private readonly http = inject(HttpClient);
+  private readonly localStorageService = inject(LocalStorageService);
 
   public selecionarPokemons(): Observable<Pokemon[]> {
     return this.http.get<PokeApiResponse>(this.url).pipe(
       switchMap((obj) => {
-        const requests = obj.results.map((r) =>
-          this.http.get<PokeApiDetailsResponse>(r.url).pipe(map(this.mapearPokemon)),
-        );
+        const requests = obj.results.map((r) => this.http.get<PokeApiDetailsResponse>(r.url));
 
         return forkJoin(requests);
+      }),
+      withLatestFrom(this.localStorageService.selecionarFavoritos()),
+      map(([objDetalhes, favoritos]) => {
+        return objDetalhes
+          .map((d) => this.mapearPokemon(d))
+          .map((p) => ({
+            ...p,
+            favorito: favoritos.some((f) => f.id === p.id),
+          }));
       }),
     );
   }
@@ -28,9 +36,17 @@ export class PokeApiService {
   public selecionarDetalhesPokemon(pokemonId: number): Observable<DetalhesDoPokemon> {
     const urlCompleto = `${this.url}/${pokemonId}`;
 
-    return this.http
-      .get<PokeApiDetailsResponse>(urlCompleto)
-      .pipe(map(this.mapearDetalhesDoPokemon));
+    return this.http.get<PokeApiDetailsResponse>(urlCompleto).pipe(
+      withLatestFrom(this.localStorageService.selecionarFavoritos()),
+      map(([objDetalhes, favoritos]) => {
+        const pokemonEstaEmFavoritos = favoritos.some((f) => f.id === objDetalhes.id);
+
+        const detalhes = this.mapearDetalhesDoPokemon(objDetalhes);
+        detalhes.favorito = pokemonEstaEmFavoritos;
+
+        return detalhes;
+      }),
+    );
   }
 
   private mapearPokemon(obj: PokeApiDetailsResponse): Pokemon {
@@ -39,7 +55,7 @@ export class PokeApiService {
       nome: converterParaTitleCase(obj.name),
       urlSprite: obj.sprites.front_default,
       tipos: obj.types.map((x) => converterParaTitleCase(x.type.name)),
-      favorito: pokemonsFavoritos.some((x) => x.id == obj.id),
+      favorito: false,
     };
   }
 
@@ -60,7 +76,7 @@ export class PokeApiService {
       tipos: obj.types.map((x) => converterParaTitleCase(x.type.name)),
       sons: { atual: obj.cries.latest, antigo: obj.cries.legacy },
       sprites: sprites,
-      favorito: pokemonsFavoritos.some((x) => x.id == obj.id),
+      favorito: false,
     };
   }
 }
